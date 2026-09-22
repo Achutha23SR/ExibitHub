@@ -1,0 +1,72 @@
+{
+  "project_name": "Event Discovery & Management Platform",
+  "version": "1.0.0",
+  "description": "Full-stack event discovery platform for attendees and comprehensive event management admin dashboard for organizers.",
+  "tech_stack": {
+    "frontend": "React.js with Tailwind CSS, Lucide Icons, Sonner toast",
+    "backend": "Node.js, Express, PostgreSQL with REST API",
+    "auth": "JWT authentication with demo admin credentials"
+  },
+  "typography": {
+    "heading_font": "Outfit, sans-serif",
+    "body_font": "Plus Jakarta Sans, sans-serif",
+    "weights": {
+      "light": 300,
+      "regular": 400,
+      "medium": 500,
+      "semibold": 600,
+      "bold": 700
+    }
+  },
+  "colors": {
+    "archetype": "ORGANIC & EARTHY / PERFORMANCE PRO",
+    "primary": "#0F172A",
+    "primary_accent": "#3B82F6",
+    "secondary": "#1E293B",
+    "accent": "#6366F1",
+    "background": "#F8FAFC",
+    "card_background": "#FFFFFF",
+    "border": "#E2E8F0",
+    "text_main": "#0F172A",
+    "text_muted": "#64748B",
+    "success": "#10B981",
+    "warning": "#F59E0B"
+  },
+  "visual_enhancers": {
+    "border_radius": "rounded-xl",
+    "shadows": "shadow-sm hover:shadow-md transition-all duration-200",
+    "backdrop_blur": "backdrop-blur-xl bg-white/80"
+  },
+  "component_path": "/app/frontend/src/components",
+  "instructions_to_main_agent": "Build a robust Node.js + Express + Postgres backend with JWT auth and event CRUD endpoints, and a React frontend featuring Event Discovery (search, filters, sorting, pagination, details view, featured carousel) and an Admin Dashboard (JWT login, event management table, create/edit modal, publish/unpublish toggle, feature toggle). Ensure all interactive elements include data-testid attributes.",
+  "universal_guidelines_for_main_agent": [
+    "You MUST NOT apply universal transition like transition: all.",
+    "You MUST NOT center align the app container.",
+    "Every interactive element must have hover, focus, and active states.",
+    "All interactive elements and key informational elements MUST include a data-testid attribute.",
+    "Use sonner for toasts.",
+    "Do not use complete transparent background in headers or overlays."
+  ],
+  "image_urls": [
+    {
+      "category": "Conference Auditorium",
+      "image_url": "https://images.unsplash.com/photo-1759477274012-263d469f0e16?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAzMjd8MHwxfHNlYXJjaHwxfHxidXNpbmVzcyUyMGNvbmZlcmVuY2UlMjBzdGFnZSUyMG1vZGVybiUyMGF1ZGl0b3JpdW18ZW58MHx8fHwxNzkwMDY2MzMwfDA&ixlib=rb-4.1.0&q=85",
+      "description": "Modern conference auditorium stage"
+    },
+    {
+      "category": "Tech Exhibition",
+      "image_url": "https://images.unsplash.com/photo-1761195689615-9469b65dac01?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjY2NjV8MHwxfHNlYXJjaHwxfHx0ZWNoJTIwZXhoaWJpdGlvbiUyMHRyYWRlJTIwc2hvdyUyMGJvb3RofGVufDB8fHx8MTc5MDA2NjMzMHww&ixlib=rb-4.1.0&q=85",
+      "description": "Tech exhibition trade show booth"
+    },
+    {
+      "category": "Workshop Hall",
+      "image_url": "https://images.unsplash.com/photo-1767507006455-538274e7be76?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjY2NzV8MHwxfHNlYXJjaHwxfHxkZXNpZ24lMjBjb25mZXJlbmNlJTIwd29ya3Nob3AlMjBtb2Rlcm4lMjBoYWxsfGVufDB8fHx8MTc5MDA2NjMzMHww&ixlib=rb-4.1.0&q=85",
+      "description": "Modern workshop exhibition space"
+    },
+    {
+      "category": "Startup Networking",
+      "image_url": "https://images.unsplash.com/photo-1675716921224-e087a0cca69a?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NTYxODd8MHwxfHNlYXJjaHwxfHxzdGFydHVwJTIwbmV0d29ya2luZyUyMGV2ZW50JTIwY29ja3RhaWwlMjBtb2Rlcm58ZW58MHx8fHwxNzkwMDY2MzI5fDA&ixlib=rb-4.1.0&q=85",
+      "description": "Startup networking event cocktail modern"
+    }
+  ]
+}
