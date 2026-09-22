@@ -8,7 +8,7 @@ from pydantic import BaseModel, Field, EmailStr
 from typing import Optional, List
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
-import os, uuid, logging, bcrypt, jwt
+import os, uuid, logging, bcrypt, jwt, re
 
 ROOT_DIR = Path(__file__).parent
 client = AsyncIOMotorClient(os.environ["MONGO_URL"])
@@ -39,6 +39,17 @@ class LoginInput(BaseModel):
     password: str = Field(min_length=6)
 
 def now(): return datetime.now(timezone.utc).isoformat()
+def slugify(value: str) -> str:
+    slug = re.sub(r"[^a-z0-9]+", "-", value.lower()).strip("-")
+    return slug or str(uuid.uuid4())
+
+async def unique_event_slug(name: str, event_id: str) -> str:
+    base = slugify(name)
+    slug = base
+    if await db.events.find_one({"slug": slug, "id": {"$ne": event_id}}, {"_id": 1}):
+        slug = f"{base}-{event_id[:6]}"
+    return slug
+
 def hash_password(password): return bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
 def verify_password(password, hashed): return bcrypt.checkpw(password.encode(), hashed.encode())
 def token_for(user):
@@ -99,7 +110,7 @@ async def featured(): return await db.events.find({"featured":True,"status":"pub
 
 @api.get("/events/{event_id}")
 async def event_detail(event_id: str):
-    event = await db.events.find_one({"id":event_id},{"_id":0})
+    event = await db.events.find_one({"$or":[{"slug":event_id},{"id":event_id}]},{"_id":0})
     if not event: raise HTTPException(404,"Event not found")
     return event
 
@@ -109,29 +120,37 @@ async def meta():
 
 @api.post("/events", dependencies=[Depends(admin_user)])
 async def create_event(data: EventInput):
-    event = data.model_dump(); event.update({"id":str(uuid.uuid4()),"created_at":now(),"updated_at":now()}); await db.events.insert_one(event); return await db.events.find_one({"id":event["id"]},{"_id":0})
+    event = data.model_dump(); event_id = str(uuid.uuid4()); event.update({"id":event_id,"slug":await unique_event_slug(data.name,event_id),"created_at":now(),"updated_at":now()}); await db.events.insert_one(event); return await db.events.find_one({"id":event["id"]},{"_id":0})
 
 @api.put("/events/{event_id}", dependencies=[Depends(admin_user)])
 async def update_event(event_id: str, data: EventInput):
-    event=data.model_dump(); event["updated_at"]=now(); result=await db.events.update_one({"id":event_id},{"$set":event})
+    existing=await db.events.find_one({"$or":[{"slug":event_id},{"id":event_id}]},{"_id":0})
+    if not existing: raise HTTPException(404,"Event not found")
+    event=data.model_dump(); event["slug"]=await unique_event_slug(data.name,existing["id"]); event["updated_at"]=now(); result=await db.events.update_one({"id":existing["id"]},{"$set":event})
     if not result.matched_count: raise HTTPException(404,"Event not found")
     return await db.events.find_one({"id":event_id},{"_id":0})
 
 @api.delete("/events/{event_id}", dependencies=[Depends(admin_user)])
 async def delete_event(event_id: str):
-    result=await db.events.delete_one({"id":event_id})
+    result=await db.events.delete_one({"$or":[{"slug":event_id},{"id":event_id}]})
     if not result.deleted_count: raise HTTPException(404,"Event not found")
     return {"ok":True}
 
 @app.on_event("startup")
 async def startup():
-    await db.users.create_index("email", unique=True); await db.events.create_index([("status",1),("start_date",1)]); await db.events.create_index([("featured",1),("start_date",1)])
+    await db.users.create_index("email", unique=True); await db.events.create_index([("status",1),("start_date",1)]); await db.events.create_index([("featured",1),("start_date",1)]); await db.events.create_index("slug", unique=True, sparse=True)
     email=os.environ["ADMIN_EMAIL"].lower(); password=os.environ["ADMIN_PASSWORD"]
     existing=await db.users.find_one({"email":email})
     if not existing: await db.users.insert_one({"id":str(uuid.uuid4()),"email":email,"password_hash":hash_password(password),"name":"EventAtlas Admin","role":"admin","created_at":now()})
     if await db.events.count_documents({}) == 0:
         for event in SEED_EVENTS: event.update({"id":str(uuid.uuid4()),"created_at":now(),"updated_at":now()})
+        for event in SEED_EVENTS: event["slug"] = slugify(event["name"])
         await db.events.insert_many(SEED_EVENTS)
+    else:
+        existing_events = await db.events.find({}, {"_id":0,"id":1,"name":1,"slug":1}).to_list(1000)
+        for event in existing_events:
+            desired = await unique_event_slug(event["name"], event["id"])
+            if event.get("slug") != desired: await db.events.update_one({"id":event["id"]},{"$set":{"slug":desired}})
 
 app.include_router(api)
 app.add_middleware(CORSMiddleware, allow_credentials=True, allow_origins=[os.environ["FRONTEND_URL"]], allow_methods=["*"], allow_headers=["*"])
