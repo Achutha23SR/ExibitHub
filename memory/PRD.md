@@ -28,6 +28,11 @@ Build a modern Event Discovery & Management Platform for discovering and managin
 - Added MongoDB indexes, safe response projections, auth credentials documentation, README, and auth testing playbook.
 - Verified production frontend build and full discovery/admin workflow testing.
 
+### 2026-09-22 — Admin create-event fix
+- Fixed the admin create flow by trimming submitted form values before validation and persistence.
+- Replaced the generic save failure message with field-specific FastAPI validation feedback.
+- Verified complete event creation, invalid-field feedback, edit, delete, authentication, and responsive admin flows.
+
 ## Prioritized backlog
 - P0: None for the initial requested workflow.
 - P1: Add organizer accounts and role-scoped management.
